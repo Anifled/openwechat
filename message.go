@@ -67,6 +67,34 @@ func (m *Message) Sender() (*User, error) {
 	return user, err
 }
 
+func SearchSender(members Members, Name string) *User {
+	for _,member := range members {
+		if Name == member.UserName {
+			return member
+		}
+	}
+	return nil
+}
+
+func (m *Message) FastSenderInGroup() (*User, error) {
+	if !m.IsComeFromGroup() {
+		return nil, errors.New("message is not from group")
+	}
+	group, err := m.Sender()
+	if err != nil {
+		return nil, err
+	}
+	sender_in_group := SearchSender(group.MemberList, m.senderInGroupUserName)
+	if sender_in_group != nil {
+		sender_in_group.Self = m.Bot.self
+		sender_in_group.formatEmoji()
+		return sender_in_group, nil
+
+	} else {
+		return sender_in_group,errors.New("can not found sender from system message")
+	}
+}
+
 // SenderInGroup 获取消息在群里面的发送者
 func (m *Message) SenderInGroup() (*User, error) {
 	if !m.IsComeFromGroup() {
